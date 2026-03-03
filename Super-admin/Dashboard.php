@@ -194,20 +194,52 @@ $clusters = [
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="header">
-            <div class="welcome-msg">
-                <h1>Super Admin</h1>
-                <p>Today is <?php echo date('l, F j, Y'); ?></p>
+        <div class="header"
+            style="background: white; border-bottom: 1px solid #e2e8f0; padding: 20px 40px; margin: -40px -40px 35px -40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div class="header-title">
+                <h1 style="margin: 0; font-size: 1.75rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">
+                    Dashboard</h1>
             </div>
 
-            <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+            <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
                 <div class="api-key-display"
-                    style="background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 12px; color: #64748b; font-family: monospace; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <i class="fas fa-key" style="color: #d4af37;"></i>
-                    <span>Key: <strong style="color: #334155;"><?= substr($api_key, 0, 8) . '...' ?></strong></span>
+                    style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 12px; font-size: 12px; color: #64748b; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-shield-halved" style="color: #d4af37;"></i>
+                    <span>Admin Key: <strong style="color: #334155;"><?= substr($api_key, 0, 8) . '...' ?></strong></span>
+                </div>
+
+                <div class="current-time-bar"
+                    style="display: flex; align-items: center; gap: 12px; background: rgba(241, 245, 249, 0.5); padding: 8px 18px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #3b82f6;">
+                        <i class="fa-regular fa-calendar-check" style="font-size: 1.1rem;"></i>
+                        <span id="sa-current-date"
+                            style="font-weight: 700; color: #1e293b; font-size: 0.9rem;"><?= date('F d, Y') ?></span>
+                    </div>
+                    <div style="width: 1px; height: 16px; background: #e2e8f0;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #6366f1;">
+                        <i class="fa-regular fa-clock" style="font-size: 1.1rem;"></i>
+                        <span id="sa-current-time"
+                            style="font-weight: 700; color: #1e293b; font-size: 0.9rem; font-variant-numeric: tabular-nums;"><?= date('h:i:s A') ?></span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            function updateSADateTime() {
+                const now = new Date();
+                const dateOptions = { month: 'long', day: '2-digit', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+                const dateElem = document.getElementById('sa-current-date');
+                const timeElem = document.getElementById('sa-current-time');
+
+                if (dateElem) dateElem.textContent = now.toLocaleDateString('en-US', dateOptions);
+                if (timeElem) timeElem.textContent = now.toLocaleTimeString('en-US', timeOptions);
+            }
+            setInterval(updateSADateTime, 1000);
+            updateSADateTime();
+        </script>
         <h2
             style="margin-bottom: 35px; font-size: 24px; color: var(--text-dark); border-bottom: 2px solid var(--primary-gold); display: inline-block; padding-bottom: 5px;">
             Department</h2>

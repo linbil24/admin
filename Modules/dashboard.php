@@ -1049,12 +1049,33 @@ $r_rows = [];
                             <?php endif;
                         }
                         ?>
-                        <div class="current-date-header"
-                            style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <i class="fa-regular fa-calendar-check" style="color: #3b82f6; font-size: 1.1rem;"></i>
-                            <span
-                                style="font-weight: 700; color: #1e293b; font-size: 0.9rem;"><?= date('F d, Y') ?></span>
+                        <div class="current-time-bar"
+                            style="display: flex; align-items: center; gap: 12px; background: rgba(248, 250, 252, 0.8); padding: 8px 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); backdrop-filter: blur(8px);">
+                            <div style="display: flex; align-items: center; gap: 8px; color: #3b82f6;">
+                                <i class="fa-regular fa-calendar-days" style="font-size: 1.1rem;"></i>
+                                <span id="current-date" style="font-weight: 700; color: #1e293b; font-size: 0.9rem;"><?= date('F d, Y') ?></span>
+                            </div>
+                            <div style="width: 1px; height: 16px; background: #e2e8f0;"></div>
+                            <div style="display: flex; align-items: center; gap: 8px; color: #6366f1;">
+                                <i class="fa-regular fa-clock" style="font-size: 1.1rem;"></i>
+                                <span id="current-time" style="font-weight: 700; color: #1e293b; font-size: 0.9rem; font-variant-numeric: tabular-nums;"><?= date('h:i:s A') ?></span>
+                            </div>
                         </div>
+
+                        <script>
+                            function updateDateTime() {
+                                const now = new Date();
+                                
+                                // Format Date: March 03, 2026
+                                const dateOptions = { month: 'long', day: '2-digit', year: 'numeric' };
+                                document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', dateOptions);
+                                
+                                // Format Time: 02:25:30 PM
+                                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                                document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', timeOptions);
+                            }
+                            setInterval(updateDateTime, 1000);
+                        </script>
                     </div>
                 </div>
             </header>
