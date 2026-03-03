@@ -1834,6 +1834,15 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
                             <option value="Low">Low Risk</option>
                         </select>
                     </div>
+                    <div class="filter-group" style="flex: 1;">
+                        <label
+                            style="font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px;">Date
+                            Filter</label>
+                        <input type="date" id="contractDateFilter"
+                            style="width: 100%; margin-top: 8px; padding: 12px 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 600; color: #1e293b; cursor: pointer; transition: all 0.3s;"
+                            onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+
                     <div class="filter-group" style="display: flex; gap: 12px;">
                         <button onclick="applyContractFilters()"
                             style="padding: 12px 25px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s;"
@@ -3498,17 +3507,20 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
         window.applyContractFilters = function () {
             const searchTerm = document.getElementById('contractSearchInput').value.toLowerCase();
             const statusFilter = document.getElementById('contractStatusFilter').value;
+            const dateFilter = document.getElementById('contractDateFilter').value;
 
             const rows = document.querySelectorAll('.contract-row');
             rows.forEach(row => {
                 const name = (row.dataset.name || "").toLowerCase();
                 const caseId = (row.dataset.case || "").toLowerCase();
                 const risk = row.dataset.risk;
+                const rowDate = row.dataset.date;
 
                 const matchesSearch = name.includes(searchTerm) || caseId.includes(searchTerm);
                 const matchesStatus = statusFilter === 'all' || risk === statusFilter;
+                const matchesDate = !dateFilter || rowDate === dateFilter;
 
-                if (matchesSearch && matchesStatus) {
+                if (matchesSearch && matchesStatus && matchesDate) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -3519,6 +3531,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
         window.clearContractFilters = function () {
             document.getElementById('contractSearchInput').value = '';
             document.getElementById('contractStatusFilter').value = 'all';
+            document.getElementById('contractDateFilter').value = '';
             const rows = document.querySelectorAll('.contract-row');
             rows.forEach(row => row.style.display = '');
         };
