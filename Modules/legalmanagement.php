@@ -1161,120 +1161,8 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
                 transform: translateX(100%);
             }
         }
-        /* Blue Filter Premium Styles */
-        .blue-filter-container {
-            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: flex-end;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .blue-filter-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: #3b82f6;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
-        }
-
-        .blue-filter-group {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .blue-filter-label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: #3b82f6;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .blue-filter-label i {
-            font-size: 1rem;
-            filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4));
-        }
-
-        .blue-filter-input-wrapper {
-            position: relative;
-        }
-
-        .blue-filter-input {
-            width: 100%;
-            padding: 14px 18px 14px 45px;
-            border: 2px solid #e2e8f0;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e293b;
-            background: #ffffff;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-        }
-
-        .blue-filter-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.15), 0 10px 20px rgba(59, 130, 246, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .blue-filter-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            transition: all 0.3s;
-        }
-
-        .blue-filter-input:focus + .blue-filter-icon {
-            color: #3b82f6;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .blue-filter-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 2px 10px;
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 800;
-            margin-left: auto;
-        }
-
-
-
-        @keyframes blue-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-
-        .active-filter-pulse {
-            animation: blue-pulse 2s infinite;
-        }
     </style>
+
 
 </head>
 
@@ -1334,32 +1222,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
             <div class="alert alert-error"><?php echo $error_message; ?></div>
         <?php endif; ?>
 
-        <!-- New: Blue Filter Premium Search Bar Section -->
-        <div id="blueFilterSection" class="blue-filter-container">
-            <div class="blue-filter-group">
-                <label class="blue-filter-label" for="unifiedSearchInput">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    Intelligent Blue Filter
-                    <span class="blue-filter-badge" id="activeFilterBadge">Live Search</span>
-                </label>
-                <div class="blue-filter-input-wrapper">
-                    <input type="text" id="unifiedSearchInput" class="blue-filter-input"
-                        placeholder="Search anything in this section (ID, Name, Date, Case...)" 
-                        oninput="runUnifiedBlueFilter()">
-                    <i class="fa-solid fa-wand-magic-sparkles blue-filter-icon"></i>
-                </div>
-            </div>
-            
-            <div class="blue-filter-group" style="flex: 0 0 auto; min-width: 150px;">
-                <label class="blue-filter-label" for="filterDate">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    Date Filter
-                </label>
-                <input type="date" id="filterDate" class="blue-filter-input" style="padding-left: 15px;" onchange="runUnifiedBlueFilter()">
-            </div>
 
-
-        </div>
 
 
         <div class="nav-tabs">
@@ -1942,7 +1805,51 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
                 </form>
             </div>
 
-            <!-- Old Filter Bar Removed in favor of Unified Blue Filter -->
+            <!-- Filter Bar -->
+            <div class="filters-container"
+                style="background: #f0f7ff; padding: 25px; border-radius: 16px; border: 2px solid #3b82f6; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.05);">
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;">
+                    <div class="filter-group" style="flex: 2; min-width: 250px;">
+                        <label
+                            style="font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px;">Search
+                            Query</label>
+                        <div style="position: relative; margin-top: 8px;">
+                            <input type="text" id="contractSearchInput" placeholder="Enter Name or Case ID..."
+                                style="width: 100%; padding: 12px 15px 12px 40px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-weight: 600; transition: all 0.3s;"
+                                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.1)'"
+                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                            <i class="fa-solid fa-search"
+                                style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #3b82f6;"></i>
+                        </div>
+                    </div>
+                    <div class="filter-group" style="flex: 1;">
+                        <label
+                            style="font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px;">Status</label>
+                        <select id="contractStatusFilter"
+                            style="width: 100%; margin-top: 8px; padding: 12px 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 600; color: #1e293b; cursor: pointer; transition: all 0.3s;"
+                            onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+                            <option value="all">All Risk Levels</option>
+                            <option value="High">High Risk</option>
+                            <option value="Medium">Medium Risk</option>
+                            <option value="Low">Low Risk</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="display: flex; gap: 12px;">
+                        <button onclick="applyContractFilters()"
+                            style="padding: 12px 25px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(59, 130, 246, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'">
+                            <i class="fa-solid fa-filter"></i> Filter
+                        </button>
+                        <button onclick="clearContractFilters()"
+                            style="padding: 12px 25px; background: #ffffff; color: #64748b; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: all 0.3s;"
+                            onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1'"
+                            onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e2e8f0'">
+                            <i class="fa-solid fa-rotate-left"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
 
 
             <!-- Contracts Table -->
@@ -3589,67 +3496,31 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
 
         // Combined Contract Filter Logic
         window.applyContractFilters = function () {
-            runUnifiedBlueFilter(); // Sync with unified filter
-        };
+            const searchTerm = document.getElementById('contractSearchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('contractStatusFilter').value;
 
-        // NEW: Unified Blue Filter System
-        window.runUnifiedBlueFilter = function () {
-            const input = document.getElementById('unifiedSearchInput');
-            const searchTerm = input.value.toLowerCase();
-            const dateFilter = document.getElementById('filterDate').value;
-            const activeSection = document.querySelector('.content-section.active');
-            if (!activeSection) return;
-
-            const sectionId = activeSection.id;
-
-
-            // Update badge animation if searching
-            const badge = document.getElementById('activeFilterBadge');
-            if (searchTerm || dateFilter) {
-                badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Filtering...';
-                badge.classList.add('active-filter-pulse');
-            } else {
-                badge.textContent = 'Live Search';
-                badge.classList.remove('active-filter-pulse');
-            }
-
-            let resultsCount = 0;
-            const rows = activeSection.querySelectorAll('table tbody tr');
-            
+            const rows = document.querySelectorAll('.contract-row');
             rows.forEach(row => {
-                if (row.cells.length <= 1 && row.cells[0].colSpan > 1) return; // Skip "No results" row
+                const name = (row.dataset.name || "").toLowerCase();
+                const caseId = (row.dataset.case || "").toLowerCase();
+                const risk = row.dataset.risk;
 
-                const textContent = row.textContent.toLowerCase();
-                let matchesSearch = textContent.includes(searchTerm);
-                let matchesDate = true;
+                const matchesSearch = name.includes(searchTerm) || caseId.includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || risk === statusFilter;
 
-                // Simple date matching if date filter is set
-                if (dateFilter) {
-                    matchesDate = textContent.includes(dateFilter);
-                }
-
-                if (matchesSearch && matchesDate) {
+                if (matchesSearch && matchesStatus) {
                     row.style.display = '';
-                    resultsCount++;
                 } else {
                     row.style.display = 'none';
                 }
             });
-
-
         };
 
-        // Update unified filter when tabs are clicked
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                setTimeout(runUnifiedBlueFilter, 100);
-            });
-        });
-
         window.clearContractFilters = function () {
-            document.getElementById('unifiedSearchInput').value = '';
-            document.getElementById('filterDate').value = '';
-            runUnifiedBlueFilter();
+            document.getElementById('contractSearchInput').value = '';
+            document.getElementById('contractStatusFilter').value = 'all';
+            const rows = document.querySelectorAll('.contract-row');
+            rows.forEach(row => row.style.display = '');
         };
 
         // Old Risk Filter Logic (Updated to use new system)
@@ -3659,12 +3530,13 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
             if (contractsBtn) contractsBtn.click();
 
             // Set the search text to the risk level for quick filtering
-            document.getElementById('unifiedSearchInput').value = level;
-            runUnifiedBlueFilter();
+            document.getElementById('contractStatusFilter').value = level;
+            applyContractFilters();
 
             // Scroll to table
             document.getElementById('contracts').scrollIntoView({ behavior: 'smooth' });
         }
+
 
     });
 </script>
