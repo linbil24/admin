@@ -1263,24 +1263,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
             margin-left: auto;
         }
 
-        .blue-filter-stats {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-            width: 100%;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 15px;
-        }
 
-        .blue-filter-stat-item {
-            font-size: 0.8rem;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .blue-filter-stat-item strong {
-            color: #3b82f6;
-        }
 
         @keyframes blue-pulse {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
@@ -1375,13 +1358,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
                 <input type="date" id="filterDate" class="blue-filter-input" style="padding-left: 15px;" onchange="runUnifiedBlueFilter()">
             </div>
 
-            <div class="blue-filter-stats">
-                <div class="blue-filter-stat-item">Currently Viewing: <strong id="currentTabName">Employees</strong></div>
-                <div class="blue-filter-stat-item">Results: <strong id="filterResultsCount">0</strong></div>
-                <div class="blue-filter-stat-item" id="filterStatusText" style="margin-left: auto; color: #10b981;">
-                    <i class="fa-solid fa-circle-check"></i> System Ready
-                </div>
-            </div>
+
         </div>
 
 
@@ -3624,8 +3601,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
             if (!activeSection) return;
 
             const sectionId = activeSection.id;
-            const tabName = document.querySelector(`.nav-tab[data-target="${sectionId}"]`).textContent;
-            document.getElementById('currentTabName').textContent = tabName;
+
 
             // Update badge animation if searching
             const badge = document.getElementById('activeFilterBadge');
@@ -3660,15 +3636,7 @@ $lowPct = $totalContracts ? round(($riskCounts['Low'] / $totalContracts) * 100, 
                 }
             });
 
-            document.getElementById('filterResultsCount').textContent = resultsCount;
-            const statusText = document.getElementById('filterStatusText');
-            if (searchTerm) {
-                statusText.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Searching ${tabName}...`;
-                statusText.style.color = '#3b82f6';
-            } else {
-                statusText.innerHTML = `<i class="fa-solid fa-circle-check"></i> System Ready`;
-                statusText.style.color = '#10b981';
-            }
+
         };
 
         // Update unified filter when tabs are clicked
