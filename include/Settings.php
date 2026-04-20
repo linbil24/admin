@@ -362,7 +362,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Account Settings - Admin</title>
     <link rel="icon" type="image/x-icon" href="../assets/image/logo2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=21">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=22">
     <style>
         .container {
             width: 100% !important;
@@ -930,7 +930,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <nav class="menu-bar-nav">
-                    <a href="#" class="menu-item"><i class="fas fa-envelope"></i> Notifications</a>
+                    <a href="#" class="menu-item" style="position: relative;">
+                        <i class="fas fa-bell"></i> Notifications
+                        <span style="position: absolute; top: 0px; right: -5px; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; padding: 0 2px;">1</span>
+                    </a>
                 </nav>
 
                 <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
@@ -1046,13 +1049,9 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <?= htmlspecialchars($user['email']) ?></td>
                                                 <td class="security-only">
                                                     <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                                        <button class="btn btn-icon" onclick="location.reload()" title="Retrieve Account" 
+                                                        <button class="btn btn-icon" onclick="openRetrieveModal(<?= $user['id'] ?>, '<?= addslashes(htmlspecialchars($user['full_name'])) ?>')" title="Retrieve Account" 
                                                             style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: all 0.2s;">
                                                             <i class="fas fa-rotate-left" style="font-size: 14px;"></i>
-                                                        </button>
-                                                        <button class="btn btn-icon" onclick="openDeleteModal(<?= $user['id'] ?>)" title="Delete User"
-                                                            style="background: rgba(239, 68, 68, 0.1); color: #ef4444; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: all 0.2s;">
-                                                            <i class="fas fa-trash-can" style="font-size: 14px;"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -1445,6 +1444,36 @@ You have been added as an administrator. To complete your account setup, please 
     </div>
 
 
+    <!-- Account Recovery Modal -->
+    <div class="modal" id="retrieveModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <span class="close-modal" onclick="closeModal('retrieveModal')">&times;</span>
+            <h3 style="margin-top: 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-rotate-left" style="color: #3b82f6;"></i> Account Recovery
+            </h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Recovery details for the selected administrator account.</p>
+            
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">User Account</label>
+                    <div id="retrieveUserName" style="font-weight: 600; color: #1e293b; margin-top: 2px;">-</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Recovery Password</label>
+                    <div id="retrievePassword" style="font-weight: 700; color: #1e3a8a; font-family: monospace; font-size: 1.1rem; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; margin-top: 5px;">
+                       <span>-</span>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Recovery Code</label>
+                    <div id="retrieveCode" style="font-weight: 700; color: #10b981; font-family: monospace; font-size: 1.25rem; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; margin-top: 5px; text-align: center; letter-spacing: 5px;">-</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="closeModal('retrieveModal')" style="justify-content: center;">Done Viewing</button>
+        </div>
+    </div>
+
     <!-- Invitation Loading Overlay -->
     <div id="inviteLoadingOverlay" class="loading-overlay">
         <div class="spinner"></div>
@@ -1531,6 +1560,14 @@ You have been added as an administrator. To complete your account setup, please 
             if (type === 'pin') document.getElementById('securityPinModal').classList.add('active');
             if (type === 'logs') document.getElementById('securityLogsModal').classList.add('active');
             if (type === 'email') document.getElementById('securityEmailModal').classList.add('active');
+        }
+
+        function openRetrieveModal(userId, fullName) {
+            document.getElementById('retrieveUserName').textContent = fullName;
+            // Simulated recovery generation
+            document.getElementById('retrievePassword').querySelector('span').textContent = 'Recover' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('retrieveCode').textContent = Math.floor(100000 + Math.random() * 899999);
+            document.getElementById('retrieveModal').classList.add('active');
         }
 
         function switchTab(tabName) {
