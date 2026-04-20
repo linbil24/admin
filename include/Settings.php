@@ -929,11 +929,27 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h1>Account Settings</h1>
                 </div>
 
-                <nav class="menu-bar-nav">
-                    <a href="#" class="menu-item" style="position: relative;">
+                <nav class="menu-bar-nav" style="position: relative;">
+                    <a href="#" class="menu-item" style="position: relative;" onclick="toggleNotifications(event)">
                         <i class="fas fa-bell"></i> Notifications
-                        <span style="position: absolute; top: 0px; right: -5px; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; padding: 0 2px;">1</span>
+                        <span id="notifBadge" style="display: none; position: absolute; top: 0px; right: -5px; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.65rem; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; padding: 0 2px;">0</span>
                     </a>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" style="display: none; position: absolute; top: 100%; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-top: 15px; z-index: 1000; overflow: hidden;">
+                        <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+                            <h4 style="margin: 0; font-size: 1rem; color: #1e293b; font-weight: 700;">Notifications</h4>
+                            <button onclick="markAllRead()" style="background: none; border: none; font-size: 0.8rem; color: #3b82f6; cursor: pointer; font-weight: 600;">Mark all read</button>
+                        </div>
+                        <div id="notifList" style="max-height: 350px; overflow-y: auto;">
+                            <div id="emptyNotif" style="padding: 20px; text-align: center; color: #64748b; font-size: 0.9rem;">
+                                No new notifications
+                            </div>
+                        </div>
+                        <div style="padding: 10px; text-align: center; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                            <a href="#" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; font-weight: 600;">View All Notifications</a>
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
@@ -1564,11 +1580,86 @@ You have been added as an administrator. To complete your account setup, please 
 
         function openRetrieveModal(userId, fullName) {
             document.getElementById('retrieveUserName').textContent = fullName;
-            // Simulated recovery generation
-            document.getElementById('retrievePassword').querySelector('span').textContent = 'Recover' + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('retrieveCode').textContent = Math.floor(100000 + Math.random() * 899999);
+            const pwd = 'Recover' + Math.floor(1000 + Math.random() * 9000);
+            const code = Math.floor(100000 + Math.random() * 899999);
+            document.getElementById('retrievePassword').querySelector('span').textContent = pwd;
+            document.getElementById('retrieveCode').textContent = code;
             document.getElementById('retrieveModal').classList.add('active');
+            
+            // Trigger Notification functionally
+            addNotification('Account Recovery Generated', `Recovery code ${code} was successfully created for ${fullName}.`);
         }
+
+        // Notification Functionality
+        function toggleNotifications(e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function addNotification(title, message) {
+            const list = document.getElementById('notifList');
+            const emptyNotif = document.getElementById('emptyNotif');
+            if(emptyNotif) emptyNotif.style.display = 'none';
+
+            const div = document.createElement('div');
+            div.className = 'notif-item unread';
+            div.style.padding = '15px 20px';
+            div.style.borderBottom = '1px solid #e2e8f0';
+            div.style.display = 'flex';
+            div.style.gap = '15px';
+            div.style.cursor = 'pointer';
+            div.style.background = '#eff6ff';
+            
+            div.innerHTML = `
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #dbeafe; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                    <i class="fas fa-rotate-left"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.9rem; color: #1e293b; font-weight: 600; margin-bottom: 3px;">${title}</div>
+                    <div style="font-size: 0.85rem; color: #64748b; line-height: 1.4;">${message}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">Just now</div>
+                </div>
+            `;
+            
+            div.onclick = function() {
+                this.style.background = 'white';
+                this.classList.remove('unread');
+                updateBadgeCount();
+            };
+
+            list.insertBefore(div, list.firstChild);
+            
+            const badge = document.getElementById('notifBadge');
+            let count = parseInt(badge.textContent || 0) + 1;
+            badge.textContent = count;
+            badge.style.display = 'flex';
+        }
+
+        function updateBadgeCount() {
+            const count = document.querySelectorAll('#notifList .notif-item.unread').length;
+            const badge = document.getElementById('notifBadge');
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        function markAllRead() {
+            document.querySelectorAll('#notifList .notif-item.unread').forEach(item => {
+                item.style.background = 'white';
+                item.classList.remove('unread');
+            });
+            updateBadgeCount();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown && dropdown.style.display === 'block') {
+                if (!e.target.closest('.menu-bar-nav')) {
+                    dropdown.style.display = 'none';
+                }
+            }
+        });
 
         function switchTab(tabName) {
             if (document.getElementById('content-general')) document.getElementById('content-general').style.display = 'none';
