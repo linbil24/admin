@@ -116,17 +116,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
                             ";
             $altBody = "Your ATIERA verification code is: {$code}\nThis code expires in 15 minutes.";
 
-            if (!sendEmail($user['email'], $user['full_name'] ?: $user['email'], $subject, $body, $altBody)) {
-              $error_message = "Could not send verification email. Please try the 'Resend code' button in a moment.";
+            if (sendEmail($user['email'], $user['full_name'] ?: $user['email'], $subject, $body, $altBody)) {
+                $prefill_email = $user['email'];
+                $show_verify_modal = true;
+                $success_message = 'Verification code sent to your email. Please check and enter the code.';
+            } else {
+                $error_message = "Could not connect to SMTP server. Network is unreachable or blocked. Please verify your internet connection or contact the administrator to fix the mailer.";
+                // Still allow them to see the modal to type a code if they somehow get it via another channel, but don't say it succeeded.
+                $prefill_email = $user['email'];
+                $show_verify_modal = true; 
             }
           } catch (\Exception $e) {
-            // Code generation or database insert failed
-            // Still show modal, user can use resend
+            $error_message = "A system error occurred while generating your code.";
           }
-
-          $prefill_email = $user['email'];
-          $show_verify_modal = true;
-          $success_message = 'Verification code sent to your email. Please check and enter the code.';
         } else {
           $error_message = 'Invalid password.';
         }

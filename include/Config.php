@@ -4,7 +4,7 @@
 
 define('SMTP_HOST', 'smtp.gmail.com');
 
-define('SMTP_PORT', 587);
+define('SMTP_PORT', 465); // Changed to 465 to bypass firewall/ISP blocks
 define('SMTP_USER', 'atiera41001@gmail.com'); // Put your random email here
 define('SMTP_PASS', 'tmtu gklv rkbn arpz');    // Put your random email App Password here
 define('SMTP_FROM_EMAIL', 'atiera41001@gmail.com');
@@ -31,12 +31,10 @@ function getBaseUrl()
 
 /**
  * Robust Email Sender
- * Attempts SMTP first, falls back to PHP mail() on failure.
+ * Uses strictly SMTP to ensure reliable delivery and accurate error reporting.
  */
 function sendEmail($to, $name, $subject, $body, $altBody = '')
 {
-    // Ensure PHPMailer classes are available
-    // These should be required by the calling script, but we can check
     if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
         return false;
     }
@@ -46,20 +44,24 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
+        $mail->Host       = SMTP_HOST; 
         $mail->SMTPAuth   = true;
         $mail->Username   = SMTP_USER;
         $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = (SMTP_PORT == 465) ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = SMTP_PORT;
-        $mail->Timeout    = 5; // Low timeout for faster fallback
+        $mail->Timeout    = 15; 
 
-        // SSL Bypass
+        // Connection Options: Bypass SSL verify and Force IPv4
+        // Forcing IPv4 ('bindto' => '0.0.0.0:0') prevents the "Network is unreachable" error on IPv6
         $mail->SMTPOptions = array(
             'ssl' => array(
                 'verify_peer' => false,
                 'verify_peer_name' => false,
                 'allow_self_signed' => true
+            ),
+            'socket' => array(
+                'bindto' => '0.0.0.0:0' // Force IPv4 routing
             )
         );
 
@@ -76,15 +78,9 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
         $mail->send();
         return true;
     } catch (\Exception $e) {
-        // SMTP failed, fallback to PHP mail()
-        try {
-            $mail->isMail(); // Switch to native PHP mail()
-            $mail->send();
-            return true;
-        } catch (\Exception $e2) {
-            error_log("Email sending failed (SMTP & Mail): " . $mail->ErrorInfo);
-            return false;
-        }
+        // Record the actual Mailer error directly so we can diagnose connection issues
+        error_log("SMTP Email strictly failed for {$to}: " . $mail->ErrorInfo);
+        return false;
     }
 }
 ?>
