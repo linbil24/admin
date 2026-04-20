@@ -792,7 +792,7 @@ $r_rows = [];
     <meta name="referrer" content="no-referrer-when-downgrade">
     <title>Dashboard - Ateria</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=2">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=3">
     <link rel="stylesheet" href="../assets/css/Visitors.css?v=1.1">
     <style>
         /* Table responsive wrappers and base layouts managed by facilities-reservation.css */
@@ -3939,20 +3939,26 @@ $r_rows = [];
 
         // Real-time Clock Function
         function updateClock() {
-            const clock = document.getElementById('real-time-clock');
-            if (clock) {
-                const now = new Date();
+            const dateEl = document.getElementById('current-date');
+            const timeEl = document.getElementById('current-time');
+            const now = new Date();
+            
+            if (dateEl) {
                 const options = { month: 'long', day: '2-digit', year: 'numeric' };
-                const dateStr = now.toLocaleDateString('en-US', options);
+                dateEl.textContent = now.toLocaleDateString('en-US', options);
+            }
+            
+            if (timeEl) {
                 const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                clock.textContent = `${dateStr} • ${timeStr}`;
+                timeEl.textContent = timeStr;
             }
         }
-        setInterval(updateClock, 1000);
-        updateClock();
-
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
+            // Start the clock
+            updateClock();
+            setInterval(updateClock, 1000);
+
             // Check if we need to open a specific management card
             const urlParams = new URLSearchParams(window.location.search);
             const tab = urlParams.get('tab');
