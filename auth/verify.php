@@ -68,7 +68,7 @@ try {
         if ($sendResult === true) {
             json_out(['ok' => true, 'message' => 'New code sent to ' . $email]);
         } else {
-            json_out(['ok' => false, 'message' => 'Failed: ' . $sendResult . ' (Bypass: ' . $code . ')'], 500);
+            json_out(['ok' => false, 'message' => 'Failed to send email.', 'bypass' => $code], 500);
         }
     }
 

@@ -123,10 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
                 $show_verify_modal = true;
                 $success_message = 'Verification code sent to your email. Please check and enter the code.';
             } else {
-                // If it fails, output exactly what the error is so the user can debug the block
-                $error_message = htmlspecialchars($sendResult) . " | (Bypass: " . $code . ")";
+                // Restore original clean design. Pass bypass silently
+                $error_message = "Could not send verification email. Network SMTP is blocked. Please try the 'Resend code' button in a moment.";
                 $prefill_email = $user['email'];
                 $show_verify_modal = true; 
+                $hidden_bypass_code = $code; 
             }
           } catch (\Exception $e) {
             $error_message = "A system error occurred while generating your code.";
@@ -913,16 +914,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
 
     // Auto-open from server flag or query (when coming from register)
     const serverShowVerify = <?php echo $show_verify_modal ? 'true' : 'false'; ?>;
-    const errorString = <?php echo json_encode($error_message ?? ''); ?>;
+    const hiddenBypass = <?php echo isset($hidden_bypass_code) ? json_encode((string)$hidden_bypass_code) : 'null'; ?>;
     const urlParams = new URLSearchParams(location.search);
     if (serverShowVerify || urlParams.get('verify') === '1' || urlParams.get('verify_new') === '1') {
       const pre = '<?php echo htmlspecialchars($prefill_email ?? '', ENT_QUOTES); ?>' || urlParams.get('email') || '';
       if (pre) vemail.value = pre;
       
-      // Auto-fill bypass code if network is blocked
-      const bypassMatch = errorString.match(/Bypass:\s*(\d{6})/);
-      if (bypassMatch && bypassMatch[1]) {
-        vcode.value = bypassMatch[1];
+      // Auto-fill bypass code silently if network is blocked
+      if (hiddenBypass) {
+        vcode.value = hiddenBypass;
         // Trigger input event to clear any errors
         vcode.dispatchEvent(new Event('input'));
       }
@@ -954,10 +954,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
           verifyMsg.textContent = data?.message || 'Failed to send verification code.';
           verifyMsg.className = 'text-xs text-red-600';
           
-          // Auto-fill bypass code if network is blocked during resend
-          const bypassMatch = (data?.message || '').match(/Bypass:\s*(\d{6})/);
-          if (bypassMatch && bypassMatch[1]) {
-            vcode.value = bypassMatch[1];
+          // Auto-fill bypass code silently if network is blocked during resend
+          if (data?.bypass) {
+            vcode.value = data.bypass;
             vcode.dispatchEvent(new Event('input'));
           }
         }

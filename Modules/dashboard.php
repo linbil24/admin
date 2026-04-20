@@ -795,24 +795,7 @@ $r_rows = [];
     <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=2">
     <link rel="stylesheet" href="../assets/css/Visitors.css?v=1.1">
     <style>
-        .table th,
-        .table td {
-            text-align: center !important;
-            vertical-align: middle;
-            background: #ffffff !important;
-            color: #000000 !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-            font-size: 0.85rem;
-            padding: 12px 15px;
-            white-space: nowrap;
-        }
-
-        .table th {
-            background: #ffffff !important;
-            color: #000000 !important;
-            font-weight: 701;
-            border-bottom: 2px solid #000000 !important;
-        }
+        /* Table responsive wrappers and base layouts managed by facilities-reservation.css */
 
         .dashboard-content {
             padding: 2rem 3rem;
