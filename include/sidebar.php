@@ -140,7 +140,7 @@ function get_nav_link($tab, $is_dashboard, $isSuperAdmin)
         style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
         <ul class="nav-links">
             <li>
-                <a href="#" onclick="openLogoutModal()" style="color: #fda4af; justify-content: center; padding-left: 0;">
+                <a href="#" onclick="openLogoutModal()" style="color: #fda4af;">
                     <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
                 </a>
             </li>
