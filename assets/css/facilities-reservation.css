@@ -169,13 +169,12 @@ body {
     content: '';
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
     width: 4px;
-    height: 24px; /* Short pill indicator */
+    height: 100%; /* Total vertical height */
     background: var(--gold);
-    border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .nav-links a.active i {

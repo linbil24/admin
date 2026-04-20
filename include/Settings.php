@@ -362,7 +362,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Account Settings - Admin</title>
     <link rel="icon" type="image/x-icon" href="../assets/image/logo2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=11">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=12">
     <style>
         :root {
             --primary-blue: #1e3a8a;
