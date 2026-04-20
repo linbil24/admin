@@ -797,11 +797,18 @@ $r_rows = [];
     <meta name="referrer" content="no-referrer-when-downgrade">
     <title>Dashboard - Ateria</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=17">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=19">
     <link rel="stylesheet" href="../assets/css/Visitors.css?v=1.1">
     <style>
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
         .dashboard-content {
-            padding: 2rem 1.5rem 2rem 0;
+            padding: 2rem 1.5rem 2rem 0; /* Flush with sidebar */
             max-width: 100%;
             margin: 0;
         }

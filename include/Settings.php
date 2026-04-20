@@ -362,8 +362,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Account Settings - Admin</title>
     <link rel="icon" type="image/x-icon" href="../assets/image/logo2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=17">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=19">
     <style>
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+        }
         :root {
             --primary-blue: #1e3a8a;
             --accent-blue: #3b82f6;
@@ -1006,10 +1011,16 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 10px; margin: 0;">
                                 <i class="fas fa-users-gear" style="color: #3b82f6;"></i> Active Users List
                             </h3>
+                        <div style="display: flex; gap: 10px; align-items: center;">
                             <button class="btn btn-primary security-only" onclick="openCreateModal()"
                                 style="padding: 10px 20px; border-radius: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                                 <i class="fas fa-user-plus"></i> Add New User
                             </button>
+                            <button class="btn btn-outline security-only" onclick="location.reload()"
+                                style="padding: 10px 20px; border-radius: 12px; font-weight: 700; border: 1px solid #e2e8f0; color: #1e3a8a;">
+                                <i class="fas fa-rotate-left"></i> Retrieve Account
+                            </button>
+                        </div>
                         </div>
 
                         <div class="viewing-container">
