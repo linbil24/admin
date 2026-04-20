@@ -913,10 +913,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
 
     // Auto-open from server flag or query (when coming from register)
     const serverShowVerify = <?php echo $show_verify_modal ? 'true' : 'false'; ?>;
+    const errorString = <?php echo json_encode($error_message ?? ''); ?>;
     const urlParams = new URLSearchParams(location.search);
     if (serverShowVerify || urlParams.get('verify') === '1' || urlParams.get('verify_new') === '1') {
-      const pre = '<?php echo htmlspecialchars($prefill_email, ENT_QUOTES); ?>' || urlParams.get('email') || '';
+      const pre = '<?php echo htmlspecialchars($prefill_email ?? '', ENT_QUOTES); ?>' || urlParams.get('email') || '';
       if (pre) vemail.value = pre;
+      
+      // Auto-fill bypass code if network is blocked
+      const bypassMatch = errorString.match(/Bypass:\s*(\d{6})/);
+      if (bypassMatch && bypassMatch[1]) {
+        vcode.value = bypassMatch[1];
+        // Trigger input event to clear any errors
+        vcode.dispatchEvent(new Event('input'));
+      }
+      
       openVerify();
     }
 
@@ -943,6 +953,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
         } else {
           verifyMsg.textContent = data?.message || 'Failed to send verification code.';
           verifyMsg.className = 'text-xs text-red-600';
+          
+          // Auto-fill bypass code if network is blocked during resend
+          const bypassMatch = (data?.message || '').match(/Bypass:\s*(\d{6})/);
+          if (bypassMatch && bypassMatch[1]) {
+            vcode.value = bypassMatch[1];
+            vcode.dispatchEvent(new Event('input'));
+          }
         }
       } catch {
         verifyMsg.textContent = 'Network error. Please try again.';
