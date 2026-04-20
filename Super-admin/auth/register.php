@@ -37,30 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt = $pdo->prepare("INSERT INTO `$sa_table` (username, email, password_hash, full_name, api_key, role, is_active) VALUES (?, ?, ?, ?, ?, 'super_admin', 1)");
             if ($stmt->execute([$username, $email, $password_hash, $full_name, $api_key])) {
 
-                // Send Welcome Email
-                try {
-                    $mail = new PHPMailer(true);
-                    $mail->isSMTP();
-                    $mail->Host = SMTP_HOST;
-                    $mail->SMTPAuth = true;
-                    $mail->Username = SMTP_USER;
-                    $mail->Password = SMTP_PASS;
-                    $mail->Port = SMTP_PORT;
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->SMTPOptions = array(
-                        'ssl' => array(
-                            'verify_peer' => false,
-                            'verify_peer_name' => false,
-                            'allow_self_signed' => true
-                        )
-                    );
-
-                    $mail->setFrom(SMTP_FROM_EMAIL, 'ATIERA Systems');
-                    $mail->addAddress($email, $full_name);
-                    $mail->isHTML(true);
-                    $mail->Subject = '🛡️ Super Admin Account Created';
-
-                    $mail->Body = "
+                // Send Welcome Email using robust helper
+                $subject = '🛡️ Super Admin Account Created';
+                $body = "
                         <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 10px; background-color: #ffffff;'>
                             <div style='text-align: center; margin-bottom: 20px;'>
                                 <h2 style='color: #1e3a8a; margin: 0;'>Account Registration Successful</h2>
@@ -84,10 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         </div>
                     ";
 
-                    $mail->send();
-                    $success = "Registration successful! You can now sign in.";
-                } catch (Exception $e) {
-                    $success = "Registration successful! (Email could not be sent: " . $mail->ErrorInfo . ")";
+                if (sendEmail($email, $full_name, $subject, $body)) {
+                  $success = "Registration successful! You can now sign in.";
+                } else {
+                  $success = "Registration successful! (Welcome email could not be sent, but your account is active.)";
                 }
             } else {
                 $error = "Registration failed. Please try again.";

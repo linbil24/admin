@@ -37,30 +37,8 @@ if ($action === 'verify' || $action === 'resend') {
 // --- HELPER: Send Email ---
 function send_email($to, $name, $code)
 {
-    $mail = new PHPMailer(true);
-    try {
-        $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = SMTP_USER;
-        $mail->Password = SMTP_PASS;
-        $mail->Port = SMTP_PORT;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
-        // SSL Bypass
-        $mail->SMTPOptions = array(
-            'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-
-        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-        $mail->addAddress($to, $name);
-        $mail->isHTML(true);
-        $mail->Subject = 'Your ATIERA Verification Code';
-        $mail->Body = "
+    $subject = 'Your ATIERA Verification Code';
+    $body = "
             <div style=\"font-family: sans-serif; padding: 20px; color: #1e293b;\">
                 <h2 style=\"color: #0f172a;\">Verify Login</h2>
                 <p>Hello {$name},</p>
@@ -71,12 +49,7 @@ function send_email($to, $name, $code)
                 <p>This code expires in 15 minutes.</p>
             </div>
         ";
-        $mail->send();
-        return true;
-    } catch (Exception $e) {
-        error_log("PHPMailer Error: " . $mail->ErrorInfo);
-        return false;
-    }
+    return sendEmail($to, $name, $subject, $body);
 }
 
 try {

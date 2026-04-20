@@ -102,33 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
             $stmt = $pdo->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (:user_id, :code, :expires_at)');
             $stmt->execute([':user_id' => $user['id'], ':code' => $code, ':expires_at' => $expiresAt]);
 
-            // Send email
-            $mail = new PHPMailer(true);
-            try {
-              $mail->SMTPDebug = 0; // 0 = off, 2 = debug
-              $mail->isSMTP();
-              $mail->Host = SMTP_HOST;
-              $mail->SMTPAuth = true;
-              $mail->Username = SMTP_USER;
-              $mail->Password = SMTP_PASS;
-              $mail->Port = SMTP_PORT;
-              $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-              $mail->Timeout = 10;
-
-              // SSL Bypass
-              $mail->SMTPOptions = array(
-                'ssl' => array(
-                  'verify_peer' => false,
-                  'verify_peer_name' => false,
-                  'allow_self_signed' => true
-                )
-              );
-
-              $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-              $mail->addAddress($user['email'], $user['full_name'] ?: $user['email']);
-              $mail->isHTML(true);
-              $mail->Subject = 'Your ATIERA verification code';
-              $mail->Body = "
+            // Send email using robust helper
+            $subject = 'Your ATIERA verification code';
+            $body = "
                                 <div style=\"font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:black\">
                                   <h2 style=\"margin:0 0 10px\">Verify your email</h2>
                                   <p>Hello " . htmlspecialchars($user['full_name'] ?: $user['email']) . ",</p>
@@ -138,11 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
                                   <p>— ATIERA</p>
                                 </div>
                             ";
-              $mail->AltBody = "Your ATIERA verification code is: {$code}\nThis code expires in 15 minutes.";
-              $mail->send();
-            } catch (\Exception $e) {
-              error_log("Email send failed during login for {$user['email']}: " . $e->getMessage() . " (Mailer info: " . $mail->ErrorInfo . ")");
-              $error_message = "Could not send verification email. Mailer error: " . $mail->ErrorInfo;
+            $altBody = "Your ATIERA verification code is: {$code}\nThis code expires in 15 minutes.";
+
+            if (!sendEmail($user['email'], $user['full_name'] ?: $user['email'], $subject, $body, $altBody)) {
+              $error_message = "Could not send verification email. Please try the 'Resend code' button in a moment.";
             }
           } catch (\Exception $e) {
             // Code generation or database insert failed

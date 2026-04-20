@@ -87,24 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                     $stmt->execute([$username, $email, $full_name, $hashed_password, $id]);
 
-                    // Send notification email
-                    try {
+                        // Send notification email using robust helper
                         $emailSettings = getEmailSettings($pdo);
-                        $mail = new PHPMailer(true);
-                        $mail->isSMTP();
-                        $mail->Host = SMTP_HOST;
-                        $mail->SMTPAuth = true;
-                        $mail->Username = SMTP_USER;
-                        $mail->Password = SMTP_PASS;
-                        $mail->Port = SMTP_PORT;
-                        $mail->SMTPOptions = array(
-                            'ssl' => array('verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true)
-                        );
-                        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-                        $mail->addAddress($email, $full_name);
-                        $mail->isHTML(true);
-                        $mail->Subject = $emailSettings['password_subject'];
-                        $mail->Body = "
+                        $subject = $emailSettings['password_subject'];
+                        $body = "
                             <div style=\"font-family: sans-serif; padding: 20px; color: #1e293b; max-width: 500px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px;\">
                                 <h2 style=\"color: #0f172a;\">Password Changed</h2>
                                 <p>Hello " . htmlspecialchars($full_name) . ",</p>
@@ -114,11 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
                         ";
-                        $mail->send();
-                    } catch (Exception $e) {
-                        // Email fail is secondary
-                        error_log("Failed to send password change notification: " . $e->getMessage());
-                    }
+                        sendEmail($email, $full_name, $subject, $body);
                 } else {
                     // Update without password
                     $stmt = $pdo->prepare("UPDATE users SET username=?, email=?, full_name=? WHERE id=?");
@@ -174,27 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt = $pdo->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, ?)');
                             $stmt->execute([$newUserId, $code, $expiresAt]);
 
-                            // 3. Send Email (Picture 1 Style + Activation Code & Link)
-                            $mail = new PHPMailer(true);
-                            $mail->isSMTP();
-                            $mail->Host = SMTP_HOST;
-                            $mail->SMTPAuth = true;
-                            $mail->Username = SMTP_USER;
-                            $mail->Password = SMTP_PASS;
-                            $mail->Port = SMTP_PORT;
-                            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                            $mail->SMTPOptions = array(
-                                'ssl' => array('verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true)
-                            );
-
-                            $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-                            $mail->addAddress($email, $full_name);
-                            $mail->isHTML(true);
-                            $mail->Subject = 'New Account Created: ATIERA Admin Panel';
-
+                            // 3. Send Email using robust helper
+                            $subject = 'New Account Created: ATIERA Admin Panel';
                             $loginUrl = $baseUrl . "/auth/login.php?verify_new=1&email=" . urlencode($email);
 
-                            $mail->Body = "
+                            $body = "
                             <div style=\"font-family: sans-serif; padding: 20px; color: #1e293b; max-width: 500px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px;\">
                                 <h2 style=\"color: #0f172a;\">Welcome to ATIERA</h2>
                                 <p>Hello " . htmlspecialchars($full_name) . ",</p>
@@ -208,12 +174,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <span style=\"font-size: 28px; font-weight: bold; letter-spacing: 8px; color: #1e40af;\">{$code}</span>
                                 </div>
                                 <div style=\"margin: 20px 0; text-align: center;\">
-                                    <a href=\"{{ $loginUrl }}\" style=\"background: #1e40af; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;\">Activate & Login</a>
+                                    <a href=\"{$loginUrl}\" style=\"background: #1e40af; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;\">Activate & Login</a>
                                 </div>
                                 <p style=\"font-size: 11px; color: #64748b; text-align: center;\">This security link and code expires in 24 hours.</p>
                             </div>
                         ";
-                            $mail->send();
+                            sendEmail($email, $full_name, $subject, $body);
                             $message = "User created! Login details sent to <strong>" . htmlspecialchars($email) . "</strong>";
                         } else {
                             // 1. Insert user (placeholder password)
@@ -227,28 +193,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt = $pdo->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, ?)');
                             $stmt->execute([$newUserId, $code, $expiresAt]);
 
-                            // 3. Send Invitation
+                            // 3. Send Invitation using robust helper
                             $emailSettings = getEmailSettings($pdo);
-                            $mail = new PHPMailer(true);
-                            $mail->isSMTP();
-                            $mail->Host = SMTP_HOST;
-                            $mail->SMTPAuth = true;
-                            $mail->Username = SMTP_USER;
-                            $mail->Password = SMTP_PASS;
-                            $mail->Port = SMTP_PORT;
-                            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                            $mail->SMTPOptions = array(
-                                'ssl' => array('verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true)
-                            );
-
-                            $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-                            $mail->addAddress($email, $full_name);
-                            $mail->isHTML(true);
-                            $mail->Subject = $emailSettings['setup_subject'];
-
+                            $subject = $emailSettings['setup_subject'];
                             $loginUrl = $baseUrl . "/auth/login.php?verify_new=1&email=" . urlencode($email);
 
-                            $mail->Body = "
+                            $body = "
                             <div style=\"font-family: sans-serif; padding: 20px; color: #1e293b; max-width: 500px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px;\">
                                 <h2 style=\"color: #0f172a;\">Setup Your Password</h2>
                                 <p>Hello " . htmlspecialchars($full_name) . ",</p>
@@ -262,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <p style=\"font-size: 13px; color: #64748b; text-align: center;\">This security link and code will expire in 24 hours.</p>
                             </div>
                         ";
-                            $mail->send();
+                            sendEmail($email, $full_name, $subject, $body);
                             $message = "Invitation sent to <strong>" . htmlspecialchars($email) . "</strong>! They can now activate their account.";
                         }
                         $pdo->commit();

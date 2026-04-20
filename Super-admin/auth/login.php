@@ -74,30 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['login_otp'] = $otp;
             $_SESSION['otp_expiry'] = time() + (5 * 60); // 5 minutes
 
-            // Send OTP via PHPMailer
-            try {
-                $mail = new PHPMailer(true);
-                $mail->isSMTP();
-                $mail->Host = SMTP_HOST;
-                $mail->SMTPAuth = true;
-                $mail->Username = SMTP_USER;
-                $mail->Password = SMTP_PASS;
-                $mail->Port = SMTP_PORT;
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->SMTPOptions = array(
-                    'ssl' => array(
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true
-                    )
-                );
-
-                $mail->setFrom(SMTP_FROM_EMAIL, 'ATIERA Security');
-                $mail->addAddress($admin['email'], $admin['full_name']);
-                $mail->isHTML(true);
-                $mail->Subject = '🔐 Super Admin Login Verification';
-
-                $mail->Body = "
+            // Send OTP using robust helper
+            $subject = '🔐 Super Admin Login Verification';
+            $body = "
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 10px; background-color: #ffffff;'>
                         <div style='text-align: center; margin-bottom: 20px;'>
                             <h2 style='color: #1e3a8a; margin: 0;'>Security Verification</h2>
@@ -118,14 +97,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 ";
 
-                $mail->send();
+            if (sendEmail($admin['email'], $admin['full_name'], $subject, $body)) {
                 $step = 2; // Move to OTP step
-                // FOR DEVELOPMENT: Always show the OTP even if mail succeeds
-                $error = "Development OTP: $otp (Email process initiated)";
-            } catch (Exception $e) {
-                $error = "Mailer Error: " . $mail->ErrorInfo;
-                $error .= " (Development OTP: $otp)";
-                $step = 2; // Still move to OTP step even if mail fails
+                $error = "Verification code sent to your email.";
+            } else {
+                $error = "Email process initiated. (Note: Using system bypass for delivery)";
+                $step = 2;
+            }
+            // FOR DEVELOPMENT: Always show the OTP even if mail fails
+            if (!isset($error) || strpos($error, 'bypass') !== false) {
+                 $error = "Development OTP: $otp (System Bypass Active)";
             }
         } else {
             $error = "Invalid username or password.";
