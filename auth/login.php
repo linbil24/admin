@@ -116,12 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
                             ";
             $altBody = "Your ATIERA verification code is: {$code}\nThis code expires in 15 minutes.";
 
-            if (sendEmail($user['email'], $user['full_name'] ?: $user['email'], $subject, $body, $altBody)) {
+            $sendResult = sendEmail($user['email'], $user['full_name'] ?: $user['email'], $subject, $body, $altBody);
+            
+            if ($sendResult === true) {
                 $prefill_email = $user['email'];
                 $show_verify_modal = true;
                 $success_message = 'Verification code sent to your email. Please check and enter the code.';
             } else {
-                $error_message = "Email blocked by network. System Bypass Code: " . $code;
+                // If it fails, output exactly what the error is so the user can debug the block
+                $error_message = htmlspecialchars($sendResult) . " | (Bypass: " . $code . ")";
                 $prefill_email = $user['email'];
                 $show_verify_modal = true; 
             }

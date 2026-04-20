@@ -64,10 +64,11 @@ try {
         $stmt = $pdo->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?,?,?)');
         $stmt->execute([$userId, $code, $expires]);
 
-        if (send_email($email, $name, $code)) {
+        $sendResult = send_email($email, $name, $code);
+        if ($sendResult === true) {
             json_out(['ok' => true, 'message' => 'New code sent to ' . $email]);
         } else {
-            json_out(['ok' => false, 'message' => 'Network blocked. Bypass Code: ' . $code], 500);
+            json_out(['ok' => false, 'message' => 'Failed: ' . $sendResult . ' (Bypass: ' . $code . ')'], 500);
         }
     }
 
