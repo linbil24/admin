@@ -362,7 +362,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Account Settings - Admin</title>
     <link rel="icon" type="image/x-icon" href="../assets/image/logo2.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=20">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=21">
     <style>
         .container {
             width: 100% !important;
@@ -930,11 +930,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <nav class="menu-bar-nav">
-                    <a href="#" class="menu-item active"><i class="fas fa-user-shield"></i> Profile</a>
-                    <a href="#" class="menu-item" onclick="switchTab('security')"><i class="fas fa-shield-halved"></i>
-                        Security</a>
                     <a href="#" class="menu-item"><i class="fas fa-envelope"></i> Notifications</a>
-                    <a href="#" class="menu-item"><i class="fas fa-gear"></i> Preferences</a>
                 </nav>
 
                 <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
