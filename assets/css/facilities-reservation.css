@@ -124,7 +124,7 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 0.85rem 2rem; /* Increased padding */
+    padding: 0.85rem 1.5rem; /* Balanced padding for icon alignment */
     color: #94a3b8;
     text-decoration: none;
     border-radius: 0; /* Square edges for full-width link feel */
@@ -155,15 +155,25 @@ body {
 }
 
 .nav-links a.active {
-    background: #0f172a;
+    background: rgba(255, 255, 255, 0.06); /* Subtle highlight */
     color: white;
     font-weight: 700;
-    border-left: 4px solid var(--gold); /* Gold indicator */
-    box-shadow: inset 5px 0 15px rgba(0,0,0,0.4);
+    position: relative;
+    border-left: none;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
 }
 
 .nav-links a.active::before {
-    display: none; /* Using border-left instead for a cleaner flush look */
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px; /* Short pill indicator */
+    background: var(--gold);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
 }
 
 .nav-links a.active i {
