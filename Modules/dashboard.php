@@ -4018,35 +4018,7 @@ $r_rows = [];
             }
         });
 
-        // Logout Modal Implementation
-        window.openLogoutModal = function () {
-            // Inject Logout Modal if missing
-            if (!document.getElementById('logoutConfirmModal')) {
-                const modalHtml = `
-                    <div id="logoutConfirmModal" style="display: none; position: fixed; inset: 0; z-index: 999999; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center; transition: all 0.3s ease;">
-                        <div style="background: #ffffff; padding: 40px; border-radius: 24px; width: 400px; text-align: center; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.5); border: 1px solid rgba(0,0,0,0.05);">
-                            <div style="width: 80px; height: 80px; background: #fff1f2; color: #e11d48; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 32px; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.1);">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                            </div>
-                            <h3 style="margin: 0 0 12px; color: #0f172a; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">Exit ATIERA?</h3>
-                            <p style="margin: 0 0 35px; color: #64748b; font-size: 1rem; font-weight: 500; line-height: 1.6;">Are you sure you want to exit Atiéra Hotel?<br>You will need to sign in again to access the dashboard.</p>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <button onclick="document.getElementById('logoutConfirmModal').style.display='none'" style="padding: 16px; border-radius: 14px; border: 2px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.2s;">No, Stay</button>
-                                <button onclick="window.confirmLogout()" style="padding: 16px; border-radius: 14px; border: none; background: #e11d48; color: white; cursor: pointer; font-weight: 700; font-size: 0.95rem; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.25); transition: all 0.2s;">Yes, Logout</button>
-                            </div>
-                        </div>
-                    </div>`;
-                const div = document.createElement('div');
-                div.innerHTML = modalHtml;
-                document.body.appendChild(div.firstElementChild);
-            }
-            document.getElementById('logoutConfirmModal').style.display = 'flex';
-        };
-
-        window.confirmLogout = function () {
-            window.location.href = "../auth/login.php?logout=1";
-        };
-
+        // Logout Modal is now globally handled by include/sidebar.php
         // Utility function to dynamically change header colors
         window.updateHeaderColor = function (cardType, bgColor) {
             const card = document.querySelector(`[data-card-type="${cardType}"]`);
