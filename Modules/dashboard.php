@@ -785,14 +785,19 @@ $r_rows = [];
 <html lang="en">
 
 <head>
-    <link rel="icon" type="image/x-icon" href="../assets/image/logo2.png?v=1">
+    <?php 
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+    $projRoot = (strpos($scriptDir, '/Modules') !== false || strpos($scriptDir, '/include') !== false || strpos($scriptDir, '/Super-admin') !== false) ? dirname($scriptDir) : $scriptDir;
+    $projRoot = rtrim($projRoot, '/');
+    ?>
+    <link rel="icon" type="image/x-icon" href="<?= $projRoot ?>/assets/image/logo2.png?v=2">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <title>Dashboard - Ateria</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=7">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=8">
     <link rel="stylesheet" href="../assets/css/Visitors.css?v=1.1">
     <style>
         /* Table responsive wrappers and base layouts managed by facilities-reservation.css */
