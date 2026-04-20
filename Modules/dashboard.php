@@ -797,15 +797,15 @@ $r_rows = [];
     <meta name="referrer" content="no-referrer-when-downgrade">
     <title>Dashboard - Ateria</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=8">
+    <link rel="stylesheet" href="../assets/css/facilities-reservation.css?v=10">
     <link rel="stylesheet" href="../assets/css/Visitors.css?v=1.1">
     <style>
         /* Table responsive wrappers and base layouts managed by facilities-reservation.css */
 
         .dashboard-content {
-            padding: 2rem 3rem;
-            max-width: 1600px;
-            margin: 0 auto;
+            padding: 2rem 1.5rem 2rem 0; /* Removed left padding */
+            max-width: 100%;
+            margin: 0;
         }
 
         /* Responsive Sidebar Styles */
@@ -1081,7 +1081,7 @@ $r_rows = [];
             <!-- Top Header -->
             <header class="top-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
                 <div class="header-inner"
-                    style="max-width: 1600px; margin: 0 auto; padding: 0 3rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    style="max-width: 100%; margin: 0; padding: 0 1.5rem 0 0; display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div class="header-title">
                         <button class="mobile-menu-btn" onclick="toggleSidebar()"
                             style="display: flex; background: none; border: none; font-size: 1.25rem; color: #64748b; cursor: pointer; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; transition: all 0.2s; margin-right: 15px;">

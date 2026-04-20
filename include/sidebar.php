@@ -18,8 +18,8 @@ function get_nav_link($tab, $is_dashboard, $isSuperAdmin)
     <div class="sidebar-header">
         <a href="<?= $isSuperAdmin ? '../Super-admin/Dashboard.php' : '../Modules/dashboard.php' ?>" class="logo-link"
             title="Go to Dashboard">
-                <div class="logo-area" style="display: flex; align-items: center; justify-content: space-between; padding: 2rem 1.5rem 1rem; width: 100%;">
-                    <div class="logo" style="display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1;">
+                <div class="logo-area">
+                    <div class="logo" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                         <?php 
                         // Robust path detection
                         $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
@@ -39,9 +39,6 @@ function get_nav_link($tab, $is_dashboard, $isSuperAdmin)
                             </div>
                         <?php endif; ?>
                     </div>
-                    <button class="sidebar-burger-btn" onclick="event.preventDefault(); toggleSidebar();" style="background: none; border: none; color: white; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; opacity: 0.7;">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
         </a>
     </div>
