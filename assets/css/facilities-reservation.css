@@ -114,7 +114,9 @@ body {
 
 .nav-links {
     list-style: none;
-    padding: 0; /* Remove 1rem padding to allow full-width active states */
+    padding: 0;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .nav-links li {
