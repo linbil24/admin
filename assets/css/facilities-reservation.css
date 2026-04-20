@@ -157,12 +157,16 @@ body {
 }
 
 .nav-links a.active {
-    background: rgba(255, 255, 255, 0.08); /* Clean, subtle highlight */
+    background: rgba(255, 255, 255, 0.08); /* Precise subtle highlight */
     color: white;
     font-weight: 700;
     position: relative;
     border-left: none;
-    box-shadow: none; /* Removed shadow for the cleaner look in Picture 2 */
+    box-shadow: none;
+}
+
+.nav-links a.active i {
+    color: #d4af37 !important; /* Icon turns gold when active as requested */
 }
 
 .nav-links a.active::before {
