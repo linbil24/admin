@@ -93,10 +93,9 @@ header {
     -webkit-text-fill-color: transparent;
 }
 
+/* Conflicting generic nav styles removed to prevent sidebar horizontal layout */
 nav ul {
-    display: flex;
     list-style: none;
-    gap: 8px;
 }
 
 nav ul li a {
