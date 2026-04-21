@@ -43,69 +43,65 @@ define('BREVO_API_KEY', 'PASTE_YOUR_API_KEY_HERE');
 
 function sendEmail($to, $name, $subject, $body, $altBody = '')
 {
-    // METHOD 1: Brevo API (Uses Port 443 - NEVER Blocked)
-    if (defined('BREVO_API_KEY') && BREVO_API_KEY !== 'PASTE_YOUR_API_KEY_HERE') {
-        $url = 'https://api.brevo.com/v3/smtp/email';
-        $data = [
-            'sender' => ['name' => SMTP_FROM_NAME, 'email' => SMTP_FROM_EMAIL],
-            'to' => [['email' => $to, 'name' => $name]],
-            'subject' => $subject,
-            'htmlContent' => $body
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'api-key: ' . BREVO_API_KEY,
-            'Content-Type: application/json'
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode >= 200 && $httpCode < 300) return true;
-    }
-
-    // METHOD 2: Native Mail Fallback (Uses local server)
-    $sender_email = 'no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'atiera.site');
-    $headers = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
-    $headers .= "From: ".SMTP_FROM_NAME." <$sender_email>\r\n";
-    $headers .= "Reply-To: ".SMTP_FROM_EMAIL."\r\n";
-
-    if (@mail($to, $subject, $body, $headers, "-f" . $sender_email)) {
-        return true; 
-    }
-
-    // METHOD 3: SMTP (Gmail) - Usually blocked on your host
     $root = dirname(__DIR__); 
-    @require_once $root . '/PHPMailer/src/Exception.php';
-    @require_once $root . '/PHPMailer/src/PHPMailer.php';
-    @require_once $root . '/PHPMailer/src/SMTP.php';
+    require_once $root . '/PHPMailer/src/Exception.php';
+    require_once $root . '/PHPMailer/src/PHPMailer.php';
+    require_once $root . '/PHPMailer/src/SMTP.php';
 
-    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        return "PHPMailer Library Not Found.";
+    }
+
+    $lastError = '';
+    
+    // --- TRY SMTP PORTS (587, 465, 25) ---
+    $configs = [
+        ['port' => 587, 'secure' => 'tls'],
+        ['port' => 465, 'secure' => 'ssl'],
+        ['port' => 25,  'secure' => '']
+    ];
+
+    foreach ($configs as $cfg) {
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = SMTP_HOST;
-            $mail->SMTPAuth = true;
-            $mail->Username = SMTP_USER;
-            $mail->Password = str_replace(' ', '', SMTP_PASS);
-            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-            $mail->Timeout = 5;
+            $mail->Host       = SMTP_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USER;
+            $mail->Password   = str_replace(' ', '', SMTP_PASS); 
+            $mail->Port       = $cfg['port'];
+            $mail->SMTPSecure = $cfg['secure'];
+            $mail->Timeout    = 5; 
+            
+            $mail->SMTPOptions = [
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]
+            ];
+
             $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
             $mail->addAddress($to, $name);
             $mail->isHTML(true);
             $mail->Subject = $subject;
-            $mail->Body = $body;
+            $mail->Body    = $body;
             $mail->send();
-            return true;
-        } catch (Exception $e) { /* silent fail */ }
+            return true; 
+        } catch (Exception $e) {
+            $lastError = $mail->ErrorInfo;
+            continue; 
+        }
     }
 
-    return "All methods failed. Please get a Brevo API Key.";
+    // --- LAST CHANCE: PHPMailer via isMail() [NO SMTP PORTS NEEDED] ---
+    try {
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isMail(); // Dadaan sa local server mailer
+        $mail->setFrom('no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'atiera.site'), SMTP_FROM_NAME);
+        $mail->addAddress($to, $name);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        return "PHPMailer Final Fail: " . $mail->ErrorInfo . " | SMTP Error: $lastError";
+    }
 }
