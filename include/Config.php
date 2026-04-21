@@ -12,18 +12,24 @@ define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 function sendEmail($to, $name, $subject, $body)
 {
+    // Try to find PHPMailer in the root directory
     $root = dirname(__DIR__); 
-    @include_once $root . '/PHPMailer/src/Exception.php';
-    @include_once $root . '/PHPMailer/src/PHPMailer.php';
-    @include_once $root . '/PHPMailer/src/SMTP.php';
+    $extPath = $root . '/PHPMailer/src/Exception.php';
+    $phpPath = $root . '/PHPMailer/src/PHPMailer.php';
+    $smtPath = $root . '/PHPMailer/src/SMTP.php';
 
-    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return "Critical Error: PHPMailer missing.";
+    if (!file_exists($phpPath)) {
+        return "PHPMailer missing at: " . $phpPath;
     }
 
-    // Try SMTP First
+    require_once $extPath;
+    require_once $phpPath;
+    require_once $smtPath;
+
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
     try {
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        // --- METHOD 1: Gmail SMTP (SSL) ---
         $mail->isSMTP();
         $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
@@ -31,7 +37,7 @@ function sendEmail($to, $name, $subject, $body)
         $mail->Password   = str_replace(' ', '', SMTP_PASS); 
         $mail->SMTPSecure = 'ssl';
         $mail->Port       = 465;
-        $mail->Timeout    = 5;
+        $mail->Timeout    = 10;
         
         $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
         $mail->addAddress($to, $name);
@@ -41,7 +47,7 @@ function sendEmail($to, $name, $subject, $body)
         
         if ($mail->send()) return true;
     } catch (Exception $e) {
-        // Fallback to Native Mail if SMTP fails
+        // Fallback to Native Mail
         try {
             $mail2 = new PHPMailer\PHPMailer\PHPMailer(true);
             $mail2->isMail();
@@ -52,10 +58,10 @@ function sendEmail($to, $name, $subject, $body)
             $mail2->Body    = $body;
             if ($mail2->send()) return true;
         } catch (Exception $e2) {
-            return "Fail: " . $mail2->ErrorInfo;
+            return "Fail: " . $mail2->ErrorInfo . " | SMTP Error: " . $e->getMessage();
         }
     }
-    return "All methods failed.";
+    return false;
 }
 
 // --- 2. BASE URL DETECTION ---
