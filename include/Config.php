@@ -1,24 +1,32 @@
 <?php
-// Central SMTP Configuration
-// Change these values to use a different sender email account
+/**
+ * ATIERA Central Configuration & Mail Engine
+ * Version 5.2
+ */
 
+// --- 1. SMTP SERVER SETTINGS ---
 define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 465); 
+define('SMTP_USER', 'atiera41001@gmail.com');
 
-define('SMTP_PORT', 465); // Changed to 465 to bypass firewall/ISP blocks
-define('SMTP_USER', 'atiera41001@gmail.com'); // Put your random email here
-define('SMTP_PASS', 'tmtu gklv rkbn arpz');    // Put your random email App Password here
+/**
+ * IMPORTANT: Generate a NEW App Password from your Google Account
+ * (Security -> 2-Step Verification -> App Passwords)
+ * Link: https://myaccount.google.com/apppasswords
+ */
+define('SMTP_PASS', 'tmtu gklv rkbn arpz'); // <--- PALITAN MO ITO NG BAGO
+
 define('SMTP_FROM_EMAIL', 'atiera41001@gmail.com');
-define('SMTP_FROM_NAME', 'ATIERA Hotel');
+define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
-// Base URL detection (helps with subdomains)
-function getBaseUrl()
-{
+
+// --- 2. BASE URL DETECTION ---
+function getBaseUrl() {
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http");
     $host = $_SERVER['HTTP_HOST'];
     $currentDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-    // Go up levels until we reach the 'admin' or project root
-    // For admin.atierahotelandrestaurant.com/admin/include/Settings.php, we want /admin/
     $parts = explode('/', trim($currentDir, '/'));
+    
     if (in_array('include', $parts)) {
         $projectRoot = '/' . implode('/', array_slice($parts, 0, array_search('include', $parts)));
     } elseif (in_array('auth', $parts)) {
@@ -29,80 +37,60 @@ function getBaseUrl()
     return $protocol . "://" . $host . rtrim($projectRoot, '/');
 }
 
-/**
- * Robust Email Sender
- * Attempts multiple ports (587, 465), forces IPv4, and formats passwords.
- * Returns true on success, or a string containing the error on failure.
- */
-function sendEmail($to, $name, $subject, $body, $altBody = '')
-{
+
+// --- 3. PREMIUM EMAIL ENGINE ---
+function sendEmail($to, $name, $subject, $body, $altBody = '') {
     if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return "PHPMailer class is completely missing from the system.";
+        return "System Error: Mail library missing.";
     }
 
-    $portsToTry = [465, 587]; // Try 465 first for Google
-    $lastError = '';
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = str_replace(' ', '', SMTP_PASS); 
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = SMTP_PORT;
+        $mail->Timeout    = 15;
+        $mail->CharSet    = 'UTF-8';
 
-    foreach ($portsToTry as $port) {
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-        try {
-            $mail->isSMTP();
-            $mail->Host       = SMTP_HOST; 
-            $mail->SMTPAuth   = true;
-            $mail->Username   = SMTP_USER;
-            // Many users paste App Passwords with spaces; Google rejects spaces
-            $mail->Password   = str_replace(' ', '', SMTP_PASS); 
-            $mail->SMTPSecure = ($port == 465) ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $port;
-            $mail->Timeout    = 10; 
+        // SSL Optimization for shared hosting
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
 
-            // SSL Bypass - useful for various hosting environments
-            $mail->SMTPOptions = array(
-                'ssl' => array(
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true
-                )
-            );
+        // Recipients
+        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+        $mail->addAddress($to, $name);
 
-            // Recipients
-            $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-            $mail->addAddress($to, $name);
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+        $mail->AltBody = $altBody ?: strip_tags($body);
 
-            // Content
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $body;
-            $mail->AltBody = $altBody ?: strip_tags($body);
-
-            $mail->send();
-            return true; // Sent successfully!
-
-        } catch (\Exception $e) {
-            $lastError = $mail->ErrorInfo;
-            // Log to a file we can actually check
-            file_put_contents(__DIR__ . '/smtp_error.log', "[" . date('Y-m-d H:i:s') . "] Port $port Error: " . $lastError . PHP_EOL, FILE_APPEND);
-            continue; // Try the next port
-        }
-    }
-
-    // FINAL FALLBACK: Native PHP mail()
-    // This often works on production servers even if SMTP ports are blocked
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>' . "\r\n";
-    $headers .= 'Reply-To: ' . SMTP_FROM_EMAIL . "\r\n";
-    $headers .= 'X-Mailer: PHP/' . phpversion();
-
-    if (@mail($to, $subject, $body, $headers)) {
-        file_put_contents(__DIR__ . '/smtp_error.log', "[" . date('Y-m-d H:i:s') . "] SMTP failed, but mail() succeeded for $to" . PHP_EOL, FILE_APPEND);
+        $mail->send();
         return true;
-    }
 
-    // If all fail, return the last error message
-    $finalMsg = "Failed to send email. SMTP Error: " . $lastError;
-    file_put_contents(__DIR__ . '/smtp_error.log', "[" . date('Y-m-d H:i:s') . "] ALL METHODS FAILED for $to. Last Error: $lastError" . PHP_EOL, FILE_APPEND);
-    error_log($finalMsg);
-    return $finalMsg;
+    } catch (Exception $e) {
+        $lastError = $mail->ErrorInfo;
+        
+        // Final Fallback: subukan ang mail() pero huwag guluhin ang code
+        $headers = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
+        $headers .= 'From: '.SMTP_FROM_NAME.' <'.SMTP_FROM_EMAIL.'>' . "\r\n";
+        
+        if (@mail($to, $subject, $body, $headers)) {
+            return true;
+        }
+
+        return "Email Error: " . $lastError;
+    }
 }
-?>
