@@ -46,53 +46,42 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
         return "System Error: Mail library missing.";
     }
 
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    $portsToTry = [587, 465]; 
+    $lastError = '';
 
-    try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = SMTP_USER;
-        $mail->Password = str_replace(' ', '', SMTP_PASS);
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port = SMTP_PORT;
-        $mail->Timeout = 15;
-        $mail->CharSet = 'UTF-8';
+    foreach ($portsToTry as $port) {
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host       = SMTP_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USER;
+            $mail->Password   = str_replace(' ', '', SMTP_PASS); 
+            $mail->SMTPSecure = ($port == 465) ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = $port;
+            $mail->Timeout    = 20; 
+            $mail->CharSet    = 'UTF-8';
 
-        // SSL Optimization for shared hosting
-        $mail->SMTPOptions = [
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ]
-        ];
+            $mail->SMTPOptions = [
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]
+            ];
 
-        // Recipients
-        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-        $mail->addAddress($to, $name);
+            $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+            $mail->addAddress($to, $name);
 
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body = $body;
-        $mail->AltBody = $altBody ?: strip_tags($body);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+            $mail->AltBody = $altBody ?: strip_tags($body);
 
-        $mail->send();
-        return true;
-
-    } catch (Exception $e) {
-        $lastError = $mail->ErrorInfo;
-        
-        // Final Fallback: subukan ang mail() pero huwag guluhin ang code
-        $headers = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
-        $headers .= 'From: '.SMTP_FROM_NAME.' <'.SMTP_FROM_EMAIL.'>' . "\r\n";
-        
-        if (@mail($to, $subject, $body, $headers)) {
+            $mail->send();
             return true;
-        }
 
-        return "Email Error: " . $lastError;
+        } catch (Exception $e) {
+            $lastError = $mail->ErrorInfo;
+            continue; 
+        }
     }
+
+    return "SMTP Final Error: " . $lastError . " (Tested Ports: 587, 465)";
 }
