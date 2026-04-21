@@ -123,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username']) && isset(
                 $show_verify_modal = true;
                 $success_message = 'Verification code sent to your email. Please check and enter the code.';
             } else {
-                // Restore original clean design. Pass bypass silently
-                $success_message = "Network SMTP is blocked. A bypass code has been auto-filled for testing.";
+                // Show the REAL error from SMTP debug mode
+                $success_message = "Email Error: " . $sendResult; 
                 $prefill_email = $user['email'];
                 $show_verify_modal = true; 
                 $hidden_bypass_code = $code; 
