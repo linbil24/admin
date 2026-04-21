@@ -3,44 +3,62 @@
  * ATIERA Hotel & Restaurant - Configuration File
  */
 
-// --- 1. EMAIL CONFIGURATION ---
+// --- 1. EMAIL CONFIGURATION (PHPMailer Only) ---
 define('SMTP_USER', 'linbilcelestre31@gmail.com');
+define('SMTP_PASS', 'poti vsjc wfth dzks');
 define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 function sendEmail($to, $name, $subject, $body)
 {
     $root = dirname(__DIR__); 
-    @include_once $root . '/PHPMailer/src/Exception.php';
-    @include_once $root . '/PHPMailer/src/PHPMailer.php';
-    @include_once $root . '/PHPMailer/src/SMTP.php';
+    @require_once $root . '/PHPMailer/src/Exception.php';
+    @require_once $root . '/PHPMailer/src/PHPMailer.php';
+    @require_once $root . '/PHPMailer/src/SMTP.php';
 
     if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return "PHPMailer Library Missing.";
+        return "Critical Error: PHPMailer files not found.";
     }
 
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
     try {
-        // METHOD: PHPMailer isMail (Ang tanging bukas sa server mo)
-        $mail->isMail();
-        
-        // CRITICAL FIX: Ang sender address ay DAPAT @atierahotelandrestaurant.com
-        // para pagkatiwalaan ni Google at hindi i-block as spam.
-        $domain_sender = 'admin@atierahotelandrestaurant.com';
-        
-        $mail->setFrom($domain_sender, SMTP_FROM_NAME);
-        $mail->addReplyTo(SMTP_USER, SMTP_FROM_NAME); // Dito pa rin papunta ang replies sa Gmail mo
+        // --- PREPARE EMAIl ---
+        $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
         $mail->addAddress($to, $name);
-        
+        $mail->addReplyTo(SMTP_USER, SMTP_FROM_NAME);
         $mail->isHTML(true);
         $mail->CharSet = 'UTF-8';
         $mail->Subject = $subject;
         $mail->Body    = $body;
-        
-        if ($mail->send()) return true;
-        
-    } catch (Exception $e) {
-        return "PHPMailer Error: " . $mail->ErrorInfo;
+
+        // --- ATTEMPT 1: PHPMailer Standard SMTP (Port 465 SSL) ---
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USER;
+            $mail->Password   = str_replace(' ', '', SMTP_PASS); 
+            $mail->SMTPSecure = 'ssl';
+            $mail->Port       = 465;
+            $mail->Timeout    = 15;
+            $mail->Hostname   = $_SERVER['HTTP_HOST'] ?? 'atierahotelandrestaurant.com';
+            
+            // Bypass SSL Verification issues
+            $mail->SMTPOptions = [
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]
+            ];
+
+            if ($mail->send()) return true;
+        } catch (Exception $e) {
+            // --- ATTEMPT 2: PHPMailer Fallback (Internal Mail Transport) ---
+            // If SMTP is blocked by firewall (Network is unreachable), this is our only hope.
+            $mail->isMail();
+            $mail->setFrom('admin@atierahotelandrestaurant.com', SMTP_FROM_NAME);
+            
+            if ($mail->send()) return true;
+        }
+    } catch (Exception $eFinal) {
+        return "All PHPMailer methods failed: " . $mail->ErrorInfo;
     }
     
     return false;
