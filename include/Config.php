@@ -3,7 +3,7 @@
  * ATIERA Hotel & Restaurant - Configuration File
  */
 
-// --- 1. EMAIL CONFIGURATION (PHPMailer Only) ---
+// --- 1. EMAIL CONFIGURATION (PHPMailer Fix) ---
 define('SMTP_USER', 'linbilcelestre31@gmail.com');
 define('SMTP_PASS', 'poti vsjc wfth dzks');
 define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
@@ -22,7 +22,6 @@ function sendEmail($to, $name, $subject, $body)
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
     try {
-        // --- PREPARE EMAIl ---
         $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
         $mail->addAddress($to, $name);
         $mail->addReplyTo(SMTP_USER, SMTP_FROM_NAME);
@@ -31,7 +30,7 @@ function sendEmail($to, $name, $subject, $body)
         $mail->Subject = $subject;
         $mail->Body    = $body;
 
-        // --- ATTEMPT 1: PHPMailer Standard SMTP (Port 465 SSL) ---
+        // --- ATTEMPT: PHPMailer SMTP (Extended Timeout) ---
         try {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
@@ -40,25 +39,22 @@ function sendEmail($to, $name, $subject, $body)
             $mail->Password   = str_replace(' ', '', SMTP_PASS); 
             $mail->SMTPSecure = 'ssl';
             $mail->Port       = 465;
-            $mail->Timeout    = 15;
+            $mail->Timeout    = 60; // Nilakihan natin sa 60 seconds (1 minute delay allowance)
             $mail->Hostname   = $_SERVER['HTTP_HOST'] ?? 'atierahotelandrestaurant.com';
             
-            // Bypass SSL Verification issues
             $mail->SMTPOptions = [
                 'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]
             ];
 
             if ($mail->send()) return true;
         } catch (Exception $e) {
-            // --- ATTEMPT 2: PHPMailer Fallback (Internal Mail Transport) ---
-            // If SMTP is blocked by firewall (Network is unreachable), this is our only hope.
+            // FALLBACK: Internal Transport
             $mail->isMail();
             $mail->setFrom('admin@atierahotelandrestaurant.com', SMTP_FROM_NAME);
-            
             if ($mail->send()) return true;
         }
     } catch (Exception $eFinal) {
-        return "All PHPMailer methods failed: " . $mail->ErrorInfo;
+        return "Fail: " . $mail->ErrorInfo;
     }
     
     return false;
