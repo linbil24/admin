@@ -8,6 +8,8 @@
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 465);
 define('SMTP_USER', 'linbilcelestre31@gmail.com');
+define('SMTP_FROM_EMAIL', 'linbilcelestre31@gmail.com');
+define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 /**
  * IMPORTANT: Generate a NEW App Password from your Google Account
@@ -16,7 +18,6 @@ define('SMTP_USER', 'linbilcelestre31@gmail.com');
  */
 define('SMTP_PASS', 'poti vsjc wfth dzks'); // <--- PALITAN MO ITO NG BAGO
 
-define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 // --- 2. BASE URL DETECTION ---
 function getBaseUrl()
