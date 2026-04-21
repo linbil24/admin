@@ -95,9 +95,11 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
     $headers .= 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>' . "\r\n";
     $headers .= 'Reply-To: ' . SMTP_FROM_EMAIL . "\r\n";
+    $headers .= 'Return-Path: ' . SMTP_FROM_EMAIL . "\r\n";
     $headers .= 'X-Mailer: PHP/' . phpversion();
 
-    if (@mail($to, $subject, $body, $headers)) {
+    // The -f flag sets the envelope sender which helps bypass some filters
+    if (@mail($to, $subject, $body, $headers, "-f" . SMTP_FROM_EMAIL)) {
         return true; 
     }
 
