@@ -3,11 +3,8 @@
  * ATIERA Hotel & Restaurant - Configuration File
  */
 
-// --- 1. EMAIL CONFIGURATION (PHPMailer Focus) ---
-define('SMTP_HOST', 'smtp.gmail.com');
+// --- 1. EMAIL CONFIGURATION ---
 define('SMTP_USER', 'linbilcelestre31@gmail.com');
-define('SMTP_PASS', 'poti vsjc wfth dzks');
-define('SMTP_FROM_EMAIL', 'linbilcelestre31@gmail.com');
 define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 function sendEmail($to, $name, $subject, $body)
@@ -18,51 +15,34 @@ function sendEmail($to, $name, $subject, $body)
     @include_once $root . '/PHPMailer/src/SMTP.php';
 
     if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return "PHPMailer Missing.";
+        return "PHPMailer Library Missing.";
     }
 
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
     try {
-        // TRY SMTP FIRST
-        $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = str_replace(' ', '', SMTP_PASS); 
-        $mail->SMTPSecure = 'ssl';
-        $mail->Port       = 465;
-        $mail->Timeout    = 5;
+        // METHOD: PHPMailer isMail (Ang tanging bukas sa server mo)
+        $mail->isMail();
         
-        $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
+        // CRITICAL FIX: Ang sender address ay DAPAT @atierahotelandrestaurant.com
+        // para pagkatiwalaan ni Google at hindi i-block as spam.
+        $domain_sender = 'admin@atierahotelandrestaurant.com';
+        
+        $mail->setFrom($domain_sender, SMTP_FROM_NAME);
+        $mail->addReplyTo(SMTP_USER, SMTP_FROM_NAME); // Dito pa rin papunta ang replies sa Gmail mo
         $mail->addAddress($to, $name);
+        
         $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
         $mail->Subject = $subject;
         $mail->Body    = $body;
         
         if ($mail->send()) return true;
+        
     } catch (Exception $e) {
-        // FALLBACK: Internal Transport (isMail)
-        // This is usually what triggers the GREEN success message on blocked hosts
-        try {
-            $mailFallback = new PHPMailer\PHPMailer\PHPMailer(true);
-            $mailFallback->isMail();
-            
-            // CRITICAL: Use your domain email here to bypass server filters
-            $sender = 'no-reply@atierahotelandrestaurant.com'; 
-            $mailFallback->setFrom($sender, SMTP_FROM_NAME);
-            $mailFallback->addReplyTo(SMTP_USER, SMTP_FROM_NAME);
-            $mailFallback->addAddress($to, $name);
-            
-            $mailFallback->isHTML(true);
-            $mailFallback->Subject = $subject;
-            $mailFallback->Body    = $body;
-            
-            if ($mailFallback->send()) return true;
-        } catch (Exception $e2) {
-            return "Final Fail: " . $mailFallback->ErrorInfo;
-        }
+        return "PHPMailer Error: " . $mail->ErrorInfo;
     }
+    
     return false;
 }
 
