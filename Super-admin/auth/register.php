@@ -63,10 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         </div>
                     ";
 
-                if (sendEmail($email, $full_name, $subject, $body)) {
+                $sendResult = sendEmail($email, $full_name, $subject, $body);
+                if ($sendResult === true) {
                   $success = "Registration successful! You can now sign in.";
                 } else {
-                  $success = "Registration successful! (Welcome email could not be sent, but your account is active.)";
+                  $success = "Registration successful! (Note: Could not send welcome email: $sendResult)";
                 }
             } else {
                 $error = "Registration failed. Please try again.";

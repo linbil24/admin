@@ -97,12 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 ";
 
-            if (sendEmail($admin['email'], $admin['full_name'], $subject, $body)) {
+            $sendResult = sendEmail($admin['email'], $admin['full_name'], $subject, $body);
+            if ($sendResult === true) {
                 $step = 2; // Move to OTP step
                 $error = "Verification code sent to your email.";
             } else {
-                $error = "Email process initiated. (Note: Using system bypass for delivery)";
-                $step = 2;
+                $error = "Email Error: " . $sendResult; // Display the actual error
+                $step = 2; // Fallback to bypass mode
             }
             // FOR DEVELOPMENT: Always show the OTP even if mail fails
             if (!isset($error) || strpos($error, 'bypass') !== false) {
