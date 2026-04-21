@@ -12,24 +12,19 @@ define('SMTP_FROM_NAME', 'ATIERA Hotel & Restaurant');
 
 function sendEmail($to, $name, $subject, $body)
 {
-    // Try to find PHPMailer in the root directory
     $root = dirname(__DIR__); 
-    $extPath = $root . '/PHPMailer/src/Exception.php';
-    $phpPath = $root . '/PHPMailer/src/PHPMailer.php';
-    $smtPath = $root . '/PHPMailer/src/SMTP.php';
+    @include_once $root . '/PHPMailer/src/Exception.php';
+    @include_once $root . '/PHPMailer/src/PHPMailer.php';
+    @include_once $root . '/PHPMailer/src/SMTP.php';
 
-    if (!file_exists($phpPath)) {
-        return "PHPMailer missing at: " . $phpPath;
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        return "PHPMailer Missing.";
     }
-
-    require_once $extPath;
-    require_once $phpPath;
-    require_once $smtPath;
 
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
     try {
-        // --- METHOD 1: Gmail SMTP (SSL) ---
+        // TRY SMTP FIRST
         $mail->isSMTP();
         $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
@@ -37,9 +32,9 @@ function sendEmail($to, $name, $subject, $body)
         $mail->Password   = str_replace(' ', '', SMTP_PASS); 
         $mail->SMTPSecure = 'ssl';
         $mail->Port       = 465;
-        $mail->Timeout    = 10;
+        $mail->Timeout    = 5;
         
-        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+        $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
         $mail->addAddress($to, $name);
         $mail->isHTML(true);
         $mail->Subject = $subject;
@@ -47,18 +42,25 @@ function sendEmail($to, $name, $subject, $body)
         
         if ($mail->send()) return true;
     } catch (Exception $e) {
-        // Fallback to Native Mail
+        // FALLBACK: Internal Transport (isMail)
+        // This is usually what triggers the GREEN success message on blocked hosts
         try {
-            $mail2 = new PHPMailer\PHPMailer\PHPMailer(true);
-            $mail2->isMail();
-            $mail2->setFrom('admin@atierahotelandrestaurant.com', SMTP_FROM_NAME);
-            $mail2->addAddress($to, $name);
-            $mail2->isHTML(true);
-            $mail2->Subject = $subject;
-            $mail2->Body    = $body;
-            if ($mail2->send()) return true;
+            $mailFallback = new PHPMailer\PHPMailer\PHPMailer(true);
+            $mailFallback->isMail();
+            
+            // CRITICAL: Use your domain email here to bypass server filters
+            $sender = 'no-reply@atierahotelandrestaurant.com'; 
+            $mailFallback->setFrom($sender, SMTP_FROM_NAME);
+            $mailFallback->addReplyTo(SMTP_USER, SMTP_FROM_NAME);
+            $mailFallback->addAddress($to, $name);
+            
+            $mailFallback->isHTML(true);
+            $mailFallback->Subject = $subject;
+            $mailFallback->Body    = $body;
+            
+            if ($mailFallback->send()) return true;
         } catch (Exception $e2) {
-            return "Fail: " . $mail2->ErrorInfo . " | SMTP Error: " . $e->getMessage();
+            return "Final Fail: " . $mailFallback->ErrorInfo;
         }
     }
     return false;
