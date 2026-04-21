@@ -54,11 +54,13 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
 
     $lastError = '';
     
-    // --- TRY SMTP PORTS (587, 465, 25) ---
+    // --- TRY SMTP PORTS (ALL COMBINATIONS) ---
     $configs = [
         ['port' => 587, 'secure' => 'tls'],
         ['port' => 465, 'secure' => 'ssl'],
-        ['port' => 25,  'secure' => '']
+        ['port' => 587, 'secure' => ''],    // No encryption (sometimes bypasses firewall)
+        ['port' => 25,  'secure' => ''],    // Standard port 25
+        ['port' => 2525, 'secure' => 'tls'] // Alternative port 2525
     ];
 
     foreach ($configs as $cfg) {
@@ -72,6 +74,7 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
             $mail->Port       = $cfg['port'];
             $mail->SMTPSecure = $cfg['secure'];
             $mail->Timeout    = 5; 
+            $mail->CharSet    = 'UTF-8';
             
             $mail->SMTPOptions = [
                 'ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]
@@ -85,7 +88,7 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
             $mail->send();
             return true; 
         } catch (Exception $e) {
-            $lastError = $mail->ErrorInfo;
+            $lastError = "Port {$cfg['port']} ({$cfg['secure']}): " . $mail->ErrorInfo;
             continue; 
         }
     }
@@ -93,15 +96,20 @@ function sendEmail($to, $name, $subject, $body, $altBody = '')
     // --- LAST CHANCE: PHPMailer via isMail() [NO SMTP PORTS NEEDED] ---
     try {
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-        $mail->isMail(); // Dadaan sa local server mailer
-        $mail->setFrom('no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'atiera.site'), SMTP_FROM_NAME);
+        $mail->isMail(); 
+        
+        // Force use a domain-based email as sender
+        $domain = $_SERVER['HTTP_HOST'] ?? 'atierahotelandrestaurant.com';
+        $mail->setFrom('admin@' . $domain, SMTP_FROM_NAME);
         $mail->addAddress($to, $name);
+        $mail->addReplyTo(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+        
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body    = $body;
         $mail->send();
         return true;
     } catch (Exception $e) {
-        return "PHPMailer Final Fail: " . $mail->ErrorInfo . " | SMTP Error: $lastError";
+        return "PHPMailer Final Fail: " . $mail->ErrorInfo;
     }
 }
